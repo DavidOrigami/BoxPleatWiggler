@@ -11,9 +11,7 @@ using namespace std;
 
 
 int main(int argc, char* argv[])
-{
-	
-	
+{	
 	double inputPrecision = 0.00005;
 	bool debugShortenLoop = false;
 	int debugShortendLoopLength = 100;
@@ -42,9 +40,7 @@ int main(int argc, char* argv[])
 	cout << "Please enter Grid Size:" << endl;
 	cin >> grid;	
 
-
 	double precision = inputPrecision * grid;
-
 	
 	while (file >> current && ((iteration < debugShortendLoopLength) || !debugShortenLoop))
 	{
@@ -66,9 +62,6 @@ int main(int argc, char* argv[])
 				previous = false;
 				smallCounter = 0;
 			}
-
-
-
 
 			//barely under case
 			if (int(current + precision) != int(current))
@@ -97,15 +90,12 @@ int main(int argc, char* argv[])
 			
 		}
 		
-
-
 		//shrinks grid back down and realigns everything
 		if (!((iteration + 4) % 5 == 0))
 		{
 			current = current - 1000000;
 			current = current / grid;
 		}
-
 
 		//repack into .cp
 		if (iteration % 5 == 0)
@@ -124,13 +114,11 @@ int main(int argc, char* argv[])
 	file.close();
 	output.close();
 	
-
 	cout << endl;
 	cout << "Done!" << endl;
 	cout << endl;
 	cout << "Fixed " << counter << " Verticies" << endl;
 	cout << "Press any key to exit" << endl;
-
 
 	while (!_kbhit())
 		continue;
