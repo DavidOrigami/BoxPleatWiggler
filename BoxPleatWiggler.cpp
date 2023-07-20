@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 	std::cout << std::endl;
 	std::cout << "Done!" << std::endl;
 	std::cout << std::endl;
-	std::cout << "Fixed " << counter << " Verticies" << std::endl;
+	std::cout << "Fixed " << counter << " Vertices" << std::endl;
 	std::cout << "Press any key to exit" << std::endl;
 
 	while (!_kbhit())
