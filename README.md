@@ -1,6 +1,6 @@
 BoxPleatWiggler
 
-This is inspired by [ThePlantPsychologist's](https://web.mit.edu/wongb/www/origami/index.html) [Wiggler](https://web.mit.edu/wongb/www/origami/resources/wiggle.html)
+This is inspired by [Brandon Wong's](https://web.mit.edu/wongb/www/origami/index.html) [Wiggler](https://web.mit.edu/wongb/www/origami/resources/wiggle.html)
 
 Things like Oripa itself and excessive moving and copypasting in Orihime/Oriedita make vertices inaccurate. 
 This little program fixes the ones that lie on any grid. It can't fix vertices that use 22.5 angle references. 
