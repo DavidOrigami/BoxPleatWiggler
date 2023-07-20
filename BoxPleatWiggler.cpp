@@ -1,21 +1,11 @@
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <iomanip>
 #include <conio.h>
 
-using std::cout;
-using std::setprecision;
-using std::endl;
-using namespace std;
-
-
 int main(int argc, char* argv[])
-{	
+{
 	double inputPrecision = 0.00005;
-	bool debugShortenLoop = false;
-	int debugShortendLoopLength = 100;
-
 	double current = 0;
 	int iteration = 1;
 	int grid = 0;
@@ -23,29 +13,27 @@ int main(int argc, char* argv[])
 	int counter = 0;
 	int smallCounter = 0;
 	bool previous = false;
-	bool isSecond = false;
-	
-	Start:
 
-	string filename = argv[1];
+	std::string filename = argv[1];
 	std::ifstream file(filename);
 
 	if (!file) {
 		std::cerr << "Error opening file: " << filename << std::endl;
+		while (!_kbhit())
+			continue;
 		return 1;
 	}
 
-	ofstream output(filename + "_fixed.cp");
+	std::ofstream output(filename + "_fixed.cp");
 
-	cout << "Please enter Grid Size:" << endl;
-	cin >> grid;	
+	std::cout << "Please enter grid size:" << std::endl;
+	std::cin >> grid;
 
 	double precision = inputPrecision * grid;
-	
-	while (file >> current && ((iteration < debugShortendLoopLength) || !debugShortenLoop))
+
+	while (file >> current)
 	{
 
-		//blows up the grid and moves everything to the positive/positive quadrant to make the next step easier
 		if (!((iteration + 4) % 5 == 0))
 		{
 			current = current * grid;
@@ -55,7 +43,7 @@ int main(int argc, char* argv[])
 		//prescion algo
 		if (!((iteration + 4) % 5 == 0))
 		{
-			//Corrected Verticie Counter Logic
+			//Corrected Vertices Counter Logic
 			smallCounter++;
 			if (smallCounter > 2)
 			{
@@ -87,9 +75,8 @@ int main(int argc, char* argv[])
 					counter++;
 				}
 			}
-			
 		}
-		
+
 		//shrinks grid back down and realigns everything
 		if (!((iteration + 4) % 5 == 0))
 		{
@@ -105,7 +92,7 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			output << setprecision(17) << current;
+			output << std::setprecision(17) << current;
 			output << " ";
 		}
 		iteration++;
@@ -113,12 +100,12 @@ int main(int argc, char* argv[])
 
 	file.close();
 	output.close();
-	
-	cout << endl;
-	cout << "Done!" << endl;
-	cout << endl;
-	cout << "Fixed " << counter << " Verticies" << endl;
-	cout << "Press any key to exit" << endl;
+
+	std::cout << std::endl;
+	std::cout << "Done!" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Fixed " << counter << " Verticies" << std::endl;
+	std::cout << "Press any key to exit" << std::endl;
 
 	while (!_kbhit())
 		continue;
