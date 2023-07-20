@@ -8,7 +8,7 @@ This little program fixes the ones that lie on any grid. It can't fix vertices t
 Instructions:
 
 1. Drag and drop your broken .cp file onto the executable
-2. Enter the grid size. !This number is  not necessarily the grid size of the model!
+2. Enter the grid size. This number is  not necessarily the grid size of the model!
    This number should be the grid size of a grid that is to dense, that every vertex that was made with standard boxpleating lies on a grid point
    In other words set it the the projects grid size (or multiples if you have partials)
 
