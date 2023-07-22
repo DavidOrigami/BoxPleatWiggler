@@ -24,7 +24,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	std::ofstream output(filename + "_fixed.cp");
+	std::string fixedFilename = filename.substr(0, filename.length() - 3);
+	
+	std::ofstream output(fixedFilename + "_fixed.cp");
 
 	std::cout << "Please enter grid size:" << std::endl;
 	std::cin >> grid;
