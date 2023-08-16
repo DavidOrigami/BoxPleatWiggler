@@ -4,7 +4,6 @@
 #include <conio.h>
 
 int main(int argc, char* argv[])
-//int main()
 {
 	const double inputPrecision = 0.0013; //Oripa can be off by up to 0.0000075     PezDorado off by 0.0013 wtf
 	double current = 0;
@@ -17,7 +16,6 @@ int main(int argc, char* argv[])
 	bool previous = false;
 
 	std::string filename = argv[1];
-	//std::string filename = ("C:\\Users\\dwism\\Downloads\\Test.cp"); 
 	std::ifstream file(filename);
 
 	if (!file)
@@ -92,15 +90,15 @@ int main(int argc, char* argv[])
 
 		//order of bases:
 
-		//1		1024
+		//1	1024
 
-		//9		1088
+		//9	1088
 
-		//5		1152
+		//5	1152
 
 		//19	1216
 
-		//3		1280
+		//3	1280
 
 		//21	1344
 
@@ -108,7 +106,7 @@ int main(int argc, char* argv[])
 
 		//23	1472
 
-		//3		1536
+		//3	1536
 
 		//25	1600
 
@@ -116,7 +114,7 @@ int main(int argc, char* argv[])
 
 		//27	1728
 
-		//7		1792
+		//7	1792
 
 		//29	1856
 
