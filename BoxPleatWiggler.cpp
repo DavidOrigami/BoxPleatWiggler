@@ -191,20 +191,13 @@ int main(int argc, char* argv[])
 		if (counter > (float(oldCounter) * 1.1f))
 		{
 			grid = initGrid;
-			std::cout << grid << " - " << counter << std::endl;
 			oldCounter = counter;
 			gridBase = 2 * i - 1;
 		}
-
-		std::cout << "Found " << counter << " bad Vertices @ Grid base: " << 2 * i - 1 << std::endl;
-
 		counter = 0;
 		smallCounter = 0;
 		previous = false;
 	}
-
-	std::cout << "Final grid base size: " << gridBase << std::endl;
-	std::cout << grid << std::endl;
 
 	precision = (inputPrecision * float(grid)) / 400;
 
@@ -281,7 +274,6 @@ int main(int argc, char* argv[])
 	file.close();
 	output.close();
 
-	std::cout << std::endl;
 	std::cout << "Done!" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Fixed " << counter << " Vertices" << std::endl;
