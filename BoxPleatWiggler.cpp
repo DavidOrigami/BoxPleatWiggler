@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-	const double inputPrecision = 0.0013; //Oripa can be off by up to 0.0000075     PezDorado off by 0.0013 wtf
+	const double inputPrecision = 0.0013; //Oripa can be off by up to 0.0000075, Oriedita copypaste up to 0.0013
 	double current = 0;
 	int iteration = 1;
 	double grid = 1;
