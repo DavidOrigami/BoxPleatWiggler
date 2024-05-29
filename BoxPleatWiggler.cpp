@@ -1,282 +1,354 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <conio.h>
+#include <vector>
 
-int main(int argc, char* argv[])
+
+
+using namespace std;
+
+#define DEBUG 0
+#define DISPLAYGRIDNUMBER 0
+
+
+float BPCutOffValue = .75;
+int counter_BP = 0;
+long long totalLineNumber = 0;
+bool failed = false;
+
+
+std::vector<double> data_22_5;
+std::vector<double> prevDataPoint;
+
+std::string filename = "";
+std::string filename_sans_cp = "";
+std::string fixedFilename_BP = "";
+
+
+
+
+
+void fix_BP()
 {
-	const double inputPrecision = 0.0013; //Oripa can be off by up to 0.0000075, Oriedita copypaste up to 0.0013
-	double current = 0;
-	int iteration = 1;
-	double grid = 1;
-	double precision = 0;
+	const double inputPrecision_BP = 0.0013; // Oripa can be off by up to 0.0000075     PezDorado.cp by Fernando was off by 0.0013 wtf
+	double current_BP = 0;
+	long long iteration_BP = 1;
+	double grid_BP = 1;
+	double precision_BP = 0;
 
-	int counter = 0;
-	int smallCounter = 0;
-	bool previous = false;
+	short smallCounter_BP = 0;
+	bool alreadyFixed_BP = false;
 
-	std::string filename = argv[1];
-	std::ifstream file(filename);
+	int initGrid_BP = 0;
+	long long oldCounter_BP = 0;
 
-	if (!file)
+	// Opens file that needs to be fixed
+	std::ifstream file_BP(filename);
+	if (!file_BP)
 	{
 		std::cerr << "Error opening file: " << filename << std::endl;
-		while (!_kbhit())
-			continue;
-		return 1;
+		failed = true;
+		return;
 	}
 
-	std::string fixedFilename = filename.substr(0, filename.length() - 3);
-	std::ofstream output(fixedFilename + "_fixed.cp");
 
-	int initGrid = 0;
-	int oldCounter = 0;
-	int gridBase = 0;
+	// Created fixed [filename]_BP temp file
+	std::ofstream output_BP(fixedFilename_BP, std::ios::trunc);
+	if (!output_BP)
+	{
+		std::cerr << "Error creating BP output file: " << fixedFilename_BP << std::endl;
+		failed = true;
+		return;
+	}
 
-	//Determines the grid size of the model 
-	for (int i = 1; i <= 16; i++)
+
+	// Determines the grid size of the model 
+	for (int i = 1; i <= 12; i++)
 	{
 		switch (i)
 		{
+			// Ordered by likelyhood
 		case 1:
-			initGrid = 1024; //Base: 1		multiplied by 1024 
+			initGrid_BP = 1152; //Base: 9		multiplied by 128	includes base 1 & 3
 			break;
 		case 2:
-			initGrid = 1536; //Base: 3		multiplied by 512
+			initGrid_BP = 1920; //Base: 15		multiplied by 128	includes base 5 
 			break;
 		case 3:
-			initGrid = 1280; //Base: 5		multiplied by 256
+			initGrid_BP = 1344; //Base: 21		multiplied by 256	includes base 7
 			break;
 		case 4:
-			initGrid = 1792; //Base: 7		multiplied by 256
+			initGrid_BP = 1408; //Base: 11		multiplied by 128
 			break;
 		case 5:
-			initGrid = 1152; //Base: 9		multiplied by 128
+			initGrid_BP = 1664; //Base: 13		multiplied by 128
 			break;
 		case 6:
-			initGrid = 1408; //Base: 11		multiplied by 128
+			initGrid_BP = 1088; //Base: 17		multiplied by 64
 			break;
 		case 7:
-			initGrid = 1664; //Base: 13		multiplied by 128
+			initGrid_BP = 1216; //Base: 19		multiplied by 64
 			break;
 		case 8:
-			initGrid = 1920; //Base: 15		multiplied by 128
+			initGrid_BP = 1472; //Base: 23		multiplied by 64
 			break;
 		case 9:
-			initGrid = 1088; //Base: 17		multiplied by 64
+			initGrid_BP = 1600; //Base: 25		multiplied by 64
 			break;
 		case 10:
-			initGrid = 1216; //Base: 19		multiplied by 64
+			initGrid_BP = 1728; //Base: 27		multiplied by 64
 			break;
 		case 11:
-			initGrid = 1344; //Base: 21		multiplied by 64
+			initGrid_BP = 1856; //Base: 29		multiplied by 64
 			break;
 		case 12:
-			initGrid = 1472; //Base: 23		multiplied by 64
-			break;
-		case 13:
-			initGrid = 1600; //Base: 25		multiplied by 64
-			break;
-		case 14:
-			initGrid = 1728; //Base: 27		multiplied by 64
-			break;
-		case 15:
-			initGrid = 1856; //Base: 29		multiplied by 64
-			break;
-		case 16:
-			initGrid = 1984; //Base: 31		multiplied by 64
+			initGrid_BP = 1984; //Base: 31		multiplied by 64
 			break;
 		}
 
-		//order of bases:
+		iteration_BP = 1;
+		precision_BP = (inputPrecision_BP * double(initGrid_BP)) / 400;
 
-		//1	1024
-
-		//9	1088
-
-		//5	1152
-
-		//19	1216
-
-		//3	1280
-
-		//21	1344
-
-		//11	1408
-
-		//23	1472
-
-		//3	1536
-
-		//25	1600
-
-		//13	1664
-
-		//27	1728
-
-		//7	1792
-
-		//29	1856
-
-		//15	1920
-
-		//31	1984
-
-		iteration = 1;
-		precision = (inputPrecision * float(initGrid)) / 400;
-
-		while (file >> current)
+		while (file_BP >> current_BP)
 		{
-			//scales and moves Vertex to make it easier to work with
-			if (!((iteration + 4) % 5 == 0))
+			//Skips if it's a line type indicator
+			if ((((iteration_BP + 4) % 5) == 0))
 			{
-				current = current * initGrid;
-				current = current / 400;
-				current = current + 1000000;
+				totalLineNumber++;
+				goto skip_Line_Type_Indicator_GridSearch;
 			}
 
-			//prescion algo
-			if (!((iteration + 4) % 5 == 0))
+
+			// Scales and moves vertex to make it easier to work with
+			current_BP = current_BP / 400;
+			current_BP = current_BP * initGrid_BP;
+			current_BP = current_BP + 1000000;
+
+
+			// Corrected lines counter logic
+			smallCounter_BP++;
+			if (smallCounter_BP > 4)
 			{
-				//Corrected Vertices Counter Logic
-				smallCounter++;
-				if (smallCounter > 2)
+				alreadyFixed_BP = false;
+				smallCounter_BP = 0;
+			}
+
+			// Barely under case
+			if (int(current_BP + precision_BP) != int(current_BP))
+			{
+				current_BP = current_BP + precision_BP;
+				current_BP = int(current_BP);
+
+				if (!alreadyFixed_BP)
 				{
-					previous = false;
-					smallCounter = 0;
-				}
+					alreadyFixed_BP = true;
+					counter_BP++;
 
-				//barely under case
-				if (int(current + precision) != int(current))
-				{
-					current = current + precision;
-					current = int(current);
-
-					if (!previous)
-					{
-						previous = true;
-						counter++;
-					}
-				}
-
-				//barely over case
-				else if ((float(int(current)) != current) && int(current - precision) != int(current))
-				{
-					current = int(current);
-
-					if (!previous)
-					{
-						previous = true;
-						counter++;
-					}
 				}
 			}
 
-			iteration++;
+			// Barely over case
+			// The double brackets are necessary, idk why exactly
+			else if (int(current_BP) != int((current_BP - precision_BP)))
+			{
+				current_BP = int(current_BP);
+				if (!alreadyFixed_BP)
+				{
+					alreadyFixed_BP = true;
+					counter_BP++;
+				}
+			}
+
+		skip_Line_Type_Indicator_GridSearch:
+			iteration_BP++;
 		}
 
-		file.close();
-		file.open(filename);
 
-		if (!file)
+		// Reopens file to get back to the beginning
+		file_BP.close();
+		file_BP.open(filename);
+		if (!file_BP)
 		{
 			std::cerr << "Error opening file: " << filename << std::endl;
-			while (!_kbhit())
-				continue;
-			return 1;
+			failed = true;
+			return;
 		}
 
-		if (counter > (float(oldCounter) * 1.1f))
+
+		// Only overwrites old grid solution if the new one has 10% more matches (arbitrary value)
+		if (counter_BP > (float(oldCounter_BP) * 1.1f))
 		{
-			grid = initGrid;
-			oldCounter = counter;
-			gridBase = 2 * i - 1;
+			grid_BP = initGrid_BP;
+			oldCounter_BP = counter_BP;
 		}
-		counter = 0;
-		smallCounter = 0;
-		previous = false;
+
+#if DEBUG
+		std::cout << initGrid_BP << "  counter: " << counter_BP << "\n";
+#endif
+
+
+		// Ends grid search prematurely if it finds a close match
+		if ((totalLineNumber * BPCutOffValue) < counter_BP)
+		{
+
+#if DISPLAYGRIDNUMBER
+			std::cout << "Found grid: " << grid_BP << "\n" << "counter: " << counter_BP << " of " << totalLineNumber << "\n";
+#endif
+
+			counter_BP = 0;
+			smallCounter_BP = 0;
+			alreadyFixed_BP = false;
+			totalLineNumber = 0;
+			goto endGridSearch;
+		}
+
+		// Resets values for next iteration
+		counter_BP = 0;
+		smallCounter_BP = 0;
+		alreadyFixed_BP = false;
+		totalLineNumber = 0;
 	}
 
-	precision = (inputPrecision * float(grid)) / 400;
 
-	while (file >> current)
-		//while (0)
+endGridSearch:
+
+
+#if DISPLAYGRIDNUMBER
+	std::cout << "Using grid: " << grid_BP << "\n";
+#endif
+
+
+	iteration_BP = 1;
+	// Fixing algo
+	while (file_BP >> current_BP)
 	{
-		//scales and moves Vertices to make it easier to work with
-		if (!((iteration + 4) % 5 == 0))
+		// Skips if it's a line type indicator
+		if (((iteration_BP + 4) % 5 == 0))
 		{
-			current = current * grid;
-			current = current / 400;
-			current = current + 1000000;
+			totalLineNumber++;
+			goto skip_Line_Type_Indicator;
 		}
 
-		//prescion algo
-		if (!((iteration + 4) % 5 == 0))
+		// Scales and moves vertex to make it easier to work with
+		current_BP = current_BP / 400;
+		current_BP = current_BP * grid_BP;
+		current_BP = current_BP + 1000000;
+
+
+		// Corrected lines counter logic
+		smallCounter_BP++;
+		if (smallCounter_BP > 4)
 		{
-			//Corrected Vertices Counter Logic
-			smallCounter++;
-			if (smallCounter > 2)
+			alreadyFixed_BP = false;
+			smallCounter_BP = 0;
+		}
+
+
+		// Barely under case
+		if (int(current_BP + precision_BP) != int(current_BP))
+		{
+			current_BP = current_BP + precision_BP;
+			current_BP = int(current_BP);
+
+			if (!alreadyFixed_BP)
 			{
-				previous = false;
-				smallCounter = 0;
-			}
-
-			//barely under case
-			if (int(current + precision) != int(current))
-			{
-				current = current + precision;
-				current = int(current);
-
-				if (!previous)
-				{
-					previous = true;
-					counter++;
-				}
-			}
-
-			//barely over case
-			else if ((float(int(current)) != current) && int(current - precision) != int(current))
-			{
-				current = int(current);
-
-				if (!previous)
-				{
-					previous = true;
-					counter++;
-				}
+				alreadyFixed_BP = true;
+				counter_BP++;
 			}
 		}
 
-		//shrinks grid back down and realigns everything
-		if (!((iteration + 4) % 5 == 0))
+
+		// Barely over case
+		// Double bracket is necessary for some reason, idk why exactly
+		else if (int(current_BP) != int((current_BP - precision_BP)))
 		{
-			current = current - 1000000;
-			current = current / grid;
-			current = current * 400;
+			current_BP = int(current_BP);
+
+			if (!alreadyFixed_BP)
+			{
+				alreadyFixed_BP = true;
+				counter_BP++;
+			}
 		}
 
-		//repack into .cp
-		if (iteration % 5 == 0)
-		{
-			output << current;
-			output << "\n";
-		}
+
+		// Shrinks grid back down and realigns everything		
+		current_BP = current_BP - 1000000;
+		current_BP = current_BP * 400;
+		current_BP = current_BP / grid_BP;
+
+
+
+	skip_Line_Type_Indicator:
+
+		// Repacks vertex back into .cp
+		if (iteration_BP % 5 == 0)
+			output_BP << std::setprecision(17) << current_BP << "\n";
 		else
-		{
-			output << std::setprecision(17) << current;
-			output << " ";
-		}
-		iteration++;
+			output_BP << std::setprecision(17) << current_BP << " ";
+
+		iteration_BP++;
 	}
 
-	file.close();
-	output.close();
+	file_BP.close();
+	output_BP.close();
+	output_BP.flush();
 
-	std::cout << "Done!" << std::endl;
-	std::cout << std::endl;
-	std::cout << "Fixed " << counter << " Vertices" << std::endl;
-	std::cout << "Press any key to exit" << std::endl;
+#if DEBUG
 
-	while (!_kbhit())
-		continue;
+#endif
+
+
+#if DEBUG
+	std::cout << "\nBP end\n";
+#endif
+
+}
+
+
+int main(int argc, char* argv[])
+{
+	filename = argv[1];
+	std::cout << "Filename: " << filename << "\n" << "\n";
+
+	// Creates various filenames
+	filename_sans_cp = filename.substr(0, filename.length() - 3);
+	fixedFilename_BP = filename_sans_cp + ("_BP");
+
+
+	// Removes _fixed.cp file if it already exists
+	std::string toRemove = filename_sans_cp;
+	toRemove.append("_fixed.cp");
+	std::remove(toRemove.c_str());
+
+
+	// Main operations
+	fix_BP();
+
+	// Creates new file name
+	std::string newName = filename_sans_cp;
+	newName.append("_fixed.cp");
+
+	//if any check failed end program
+	if (failed)
+	{
+		std::remove(fixedFilename_BP.c_str());
+		std::cout << "Press any key to exit" << "\n";
+		std::cin.get();
+		return 2;
+	}
+
+
+	// Removes and renames files
+	
+		//IO and Removes 22.5 File
+		std::cout << "\n" << "Done!" << "\n" << "\n" << "Fixed " << counter_BP << " lines" << "\n";
+		// Renames BP file
+		std::rename(fixedFilename_BP.c_str(), newName.c_str());
+
+
+	// Closing ceremony
+	std::cout << "Press any key to exit" << "\n";
+	std::cin.get();
+	return 1;
 }
